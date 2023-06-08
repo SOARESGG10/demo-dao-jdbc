@@ -1,5 +1,8 @@
 package br.soares.model.entities;
 
+import br.soares.util.CurrencyFormatter;
+import br.soares.util.DateFormatter;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
@@ -13,17 +16,16 @@ public class Seller implements Serializable {
     private String name;
     private String email;
     private Date birthDate;
-    private Double baseSalary;
+    private Double salary;
     private Department department;
 
     public Seller() {}
 
-    public Seller(Integer id, String name, String email, Date birthDate, Double baseSalary, Department department) {
-        this.id = id;
+    public Seller(String name, String email, Date birthDate, Double salary, Department department) {
         this.name = name;
         this.email = email;
         this.birthDate = birthDate;
-        this.baseSalary = baseSalary;
+        this.salary = salary;
         this.department = department;
     }
 
@@ -59,12 +61,12 @@ public class Seller implements Serializable {
         this.birthDate = birthDate;
     }
 
-    public Double getBaseSalary() {
-        return baseSalary;
+    public Double getSalary() {
+        return salary;
     }
 
-    public void setBaseSalary(Double baseSalary) {
-        this.baseSalary = baseSalary;
+    public void setSalary(Double salary) {
+        this.salary = salary;
     }
 
     public Department getDepartment() {
@@ -90,13 +92,13 @@ public class Seller implements Serializable {
 
     @Override
     public String toString() {
-        return "Seller{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", birthDate=" + birthDate +
-                ", baseSalary=" + baseSalary +
-                ", department=" + department +
-                '}';
+
+        return String.format(
+                "Seller: %s%n" +
+                "Email: %s%n" +
+                "Birth Date: %s%n" +
+                "Salary: %s%n" +
+                "Department: %n" +
+                "   %s%n",name, email, DateFormatter.format(birthDate), CurrencyFormatter.format(salary), department);
     }
 }
