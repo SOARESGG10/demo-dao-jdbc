@@ -3,22 +3,21 @@ package br.soares.application;
 import br.soares.model.dao.DAOFactory;
 import br.soares.model.dao.DepartmentDAO;
 import br.soares.model.dao.SellerDAO;
-import br.soares.model.entities.Seller;
+import br.soares.model.entities.Department;
 
-import java.util.List;
+import java.text.ParseException;
 
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
        SellerDAO sellerDAO = DAOFactory.createSellerDAO();
        DepartmentDAO departmentDAO = DAOFactory.createDepartmentDAO();
 
-       List<Seller> sellersDepartment = sellerDAO.findAll();
-       List<Seller> sellers = sellerDAO.findAll();
+       Department getDepartment = departmentDAO.findById(3);
+       getDepartment.setName("Fashion");
+       departmentDAO.update(getDepartment);
+       System.out.println(getDepartment.getName());
 
-       sellersDepartment.forEach(System.out::println);
     }
-
-
 }
