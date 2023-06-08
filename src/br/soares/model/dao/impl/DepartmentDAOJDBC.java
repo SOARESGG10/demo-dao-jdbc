@@ -4,7 +4,6 @@ import br.soares.database.Database;
 import br.soares.database.exceptions.DatabaseException;
 import br.soares.model.dao.DepartmentDAO;
 import br.soares.model.entities.Department;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,17 +18,97 @@ public class DepartmentDAOJDBC implements DepartmentDAO {
 
     @Override
     public void insert(Department obj) {
+        PreparedStatement preparedStatement = null;
 
+        try {
+            preparedStatement = connection.prepareStatement(
+                    "INSERT INTO department (name) " +
+                            "VALUES (?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, obj.getName());
+
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            if(rowsAffected > 0) {
+                ResultSet resultSet = preparedStatement.getGeneratedKeys();
+                if(resultSet.next()) {
+                    int id = resultSet.getInt(1);
+                    obj.setId(id);
+                } else {
+                    throw new DatabaseException("Unexpected error! No rows affected");
+                }
+                Database.closeResultSet(resultSet);
+            }
+        } catch (SQLException exception) {
+            throw new DatabaseException(exception.getMessage());
+        } finally {
+            Database.closeStatement(preparedStatement);
+        }
     }
 
     @Override
     public void update(Department obj) {
+        PreparedStatement preparedStatement = null;
+
+        try {
+
+            preparedStatement = connection.prepareStatement(
+                    "UPDATE department " +
+                            "SET name = ?" +
+                            "WHERE id = ?",
+                    Statement.RETURN_GENERATED_KEYS
+            );
+
+            preparedStatement.setString(1, obj.getName());
+            preparedStatement.setInt(2, obj.getId());
+
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            if(rowsAffected > 0) {
+                ResultSet resultSet = preparedStatement.getGeneratedKeys();
+                if(resultSet.next()) {
+                    int id = resultSet.getInt(1);
+                    obj.setId(id);
+                }
+                Database.closeResultSet(resultSet);
+            } else {
+                throw new DatabaseException("Unexpected error! No rows affected");
+            }
+
+        } catch (SQLException exception) {
+            throw new DatabaseException(exception.getMessage());
+        } finally {
+            Database.closeStatement(preparedStatement);
+        }
 
     }
 
     @Override
     public void deleteById(Integer id) {
+        PreparedStatement preparedStatement = null;
 
+        try {
+            preparedStatement = connection.prepareStatement(
+                    "DELETE FROM department" +
+                            "WHERE id = ?"
+            );
+
+            preparedStatement.setInt(1, id);
+
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            if(rowsAffected > 0) {
+                ResultSet resultSet = preparedStatement.getGeneratedKeys();
+                System.out.println("Done! rows affected " + rowsAffected);
+                Database.closeResultSet(resultSet);
+            } else {
+                throw new DatabaseException("Unexpected error! No rows affected");
+            }
+        } catch (SQLException exception) {
+            throw new DatabaseException(exception.getMessage());
+        } finally {
+            Database.closeStatement(preparedStatement);
+        }
     }
 
     @Override
@@ -39,10 +118,9 @@ public class DepartmentDAOJDBC implements DepartmentDAO {
 
         try {
             preparedStatement = connection.prepareStatement(
-                    "SELECT seller.*, department.Name as DeptName " +
-                    "FROM seller " +
-                    "JOIN department ON seller.DepartmentId = department.Id " +
-                    "WHERE department.Id = ?"
+                    "SELECT * " +
+                    "FROM department " +
+                            "WHERE id = ?"
             );
 
             preparedStatement.setInt(1, id);
@@ -50,8 +128,8 @@ public class DepartmentDAOJDBC implements DepartmentDAO {
 
             if(resultSet.next()) {
                 Department department = new Department();
-                department.setId(resultSet.getInt("Id"));
-                department.setName(resultSet.getString("Name"));
+                department.setId(resultSet.getInt("id"));
+                department.setName(resultSet.getString("name"));
                 return department;
             }
 
@@ -72,12 +150,14 @@ public class DepartmentDAOJDBC implements DepartmentDAO {
         try {
             statement = connection.createStatement();
 
-            resultSet = statement.executeQuery("SELECT * FROM department");
+            resultSet = statement.executeQuery(
+                    "SELECT * FROM department"
+            );
 
             while(resultSet.next()) {
                 Department department = new Department();
-                department.setId(resultSet.getInt("Id"));
-                department.setName(resultSet.getString("Name"));
+                department.setId(resultSet.getInt("id"));
+                department.setName(resultSet.getString("name"));
                 departments.add(department);
             }
             return departments;
